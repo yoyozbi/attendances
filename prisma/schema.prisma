@@ -1,0 +1,67 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+    id        String @id @default(uuid())
+    firstName String
+    lastName  String
+    group     Group @relation(fields: [groupId], references: [id])
+    groupId   String
+    meetings MembersOnMeetings[]
+}
+
+
+model Group {
+    id     String @id @default(uuid())
+    name   String
+    members Member[]
+    meetingsGroups GroupsOnMeetingGroups[]
+}
+model MeetingGroup {
+    id   String @id @default(uuid())
+    name String
+    meetings Meeting[]
+    groups GroupsOnMeetingGroups[]
+}
+
+model GroupsOnMeetingGroups {
+   group          Group @relation(fields: [groupId], references: [id])
+   groupId        String
+   meetingGroup   MeetingGroup @relation(fields: [meetingGroupId], references: [id])
+   meetingGroupId String
+
+   @@id([groupId, meetingGroupId])
+}
+
+model Meeting {
+    id           String @id @default(uuid())
+    forDate      DateTime @default(now())
+    meetingGroup MeetingGroup @relation(fields: [meetingGroupId], references: [id])
+    meetingGroupId String
+    members MembersOnMeetings[]
+}
+
+model MembersOnMeetings {
+  member    Member @relation(fields: [memberId], references: [id])
+  memberId  String
+  meeting   Meeting @relation(fields: [meetingId], references: [id])
+  meetingId String
+
+  @@id([memberId, meetingId])
+}
+
+model User {
+  id           String @id @default(uuid())
+  email        String @unique 
+  passwordHash String
+}
+
