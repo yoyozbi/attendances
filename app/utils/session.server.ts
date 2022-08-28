@@ -56,7 +56,7 @@ export async function getUser(request: Request) {
   try {
     const user = await db.user.findUnique({
       where: { id: userId },
-      select: { id: true, username: true },
+      select: { id: true },
     });
     return user;
   } catch {
@@ -117,7 +117,9 @@ export async function login({
 
 export async function logout(request: Request): Promise<void> {
   const session = await getUserSession(request);
-  throw redirect("/login", {
+  let url = new URL(request.url);
+  let redirectTo = url.searchParams.get("redirectTo");
+  throw redirect(`/login?redirectTo=${redirectTo}`, {
     headers: {
       "Set-Cookie": await storage.destroySession(session),
     },
